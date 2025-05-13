@@ -1,6 +1,4 @@
-<h1 align="center">Mousikares - Realtime Music Application ✨</h1>
-
-![Demo App](/frontend/public/screenshot-for-readme.png)
+<h1 align="center">Mousikares ✨</h1>
 
 [Watch Full Tutorial on Youtube](https://youtu.be/4sbklcQ0EXc)
 
@@ -41,12 +39,12 @@ MONGODB_URI=mongodb+srv://libys97:<db_password>@mousikares.aimfgzk.mongodb.net/?
 ADMIN_EMAIL=your-email@example.com
 NODE_ENV=development
 
-CLOUDINARY_API_KEY=931791722285347
-CLOUDINARY_API_SECRET=X0NSYo5grdMsAccu5SjVNwt-nCU
-CLOUDINARY_CLOUD_NAME=dhg9kg7e8
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_CLOUD_NAME=
 
-CLERK_PUBLISHABLE_KEY=pk_test_b3JpZW50ZWQtZGFuZS05My5jbGVyay5hY2NvdW50cy5kZXYk
-CLERK_SECRET_KEY=sk_test_qVjr164Ikq3UNzS220NhSVUmeh7shfU8dfeA5Pgzib
+CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 ```
 
 ### Frontend (.env)
@@ -54,10 +52,10 @@ CLERK_SECRET_KEY=sk_test_qVjr164Ikq3UNzS220NhSVUmeh7shfU8dfeA5Pgzib
 Δημιουργήστε ένα αρχείο `.env` στον φάκελο `frontend` με τα εξής περιεχόμενα:
 
 ```bash
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_b3JpZW50ZWQtZGFuZS05My5jbGVyay5hY2NvdW50cy5kZXYk
+VITE_CLERK_PUBLISHABLE_KEY=
 VITE_API_URL=http://localhost:5000/api
 VITE_SOCKET_URL=http://localhost:5000
-VITE_CLOUDINARY_CLOUD_NAME=dhg9kg7e8
+VITE_CLOUDINARY_CLOUD_NAME=
 ```
 
 ### Οδηγίες για τις μεταβλητές περιβάλλοντος
