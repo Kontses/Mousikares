@@ -18,9 +18,9 @@ import songRoutes from "./routes/song.route.js";
 import albumRoutes from "./routes/album.route.js";
 import statRoutes from "./routes/stat.route.js";
 
-dotenv.config();
-
 const __dirname = path.resolve();
+dotenv.config({ path: path.resolve(__dirname, ".env.local") });
+
 const app = express();
 const PORT = process.env.PORT;
 
