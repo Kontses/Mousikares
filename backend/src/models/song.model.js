@@ -27,6 +27,8 @@ const songSchema = new mongoose.Schema(
 			ref: "Album",
 			required: false,
 		},
+		generalGenre: { type: String }, // Added generalGenre
+		specificGenres: [{ type: String }], // Added specificGenres as an array of strings
 	},
 	{ timestamps: true }
 );

@@ -112,3 +112,89 @@ export const deleteAlbum = async (req, res, next) => {
 export const checkAdmin = async (req, res, next) => {
 	res.status(200).json({ admin: true });
 };
+
+export const handleUpload = async (req, res, next) => {
+	try {
+		const audioFiles = req.files?.audioFiles; // Assuming audio files are sent under the key 'audioFiles'
+		const imageFile = req.files?.imageFile; // Assuming image file is sent under the key 'imageFile'
+		const { albumDetails, singleSongDetails, albumSongsDetails } = req.body; // Assuming these are sent in the request body
+
+		if (!audioFiles) {
+			return res.status(400).json({ message: "No audio files uploaded" });
+		}
+
+		if (Array.isArray(audioFiles)) {
+			// Multiple audio files - create an album
+			if (!imageFile || !albumDetails) {
+				return res.status(400).json({ message: "Missing image or album details for album upload" });
+			}
+
+			const imageUrl = await uploadToCloudinary(imageFile);
+
+			const parsedAlbumDetails = JSON.parse(albumDetails); // Parse albumDetails JSON
+
+			const album = new Album({
+				title: parsedAlbumDetails.title,
+				artist: parsedAlbumDetails.artist,
+				imageUrl,
+				releaseDate: new Date(parsedAlbumDetails.releaseDate), // Use releaseDate and convert to Date
+				generalGenre: parsedAlbumDetails.generalGenre, // Include generalGenre
+				specificGenres: parsedAlbumDetails.specificGenres, // Include specificGenres
+			});
+
+			await album.save();
+
+			const songIds = [];
+			for (const [index, audioFile] of audioFiles.entries()) {
+				const audioUrl = await uploadToCloudinary(audioFile);
+				const songDetails = albumSongsDetails[index]; // Get details for the specific song
+
+				const song = new Song({
+					title: songDetails.title,
+					artist: parsedAlbumDetails.artist, // Assuming album artist for all songs in album
+					audioUrl,
+					imageUrl, // Using album image for songs in album
+					duration: 0, // TODO: Get actual duration
+					albumId: album._id,
+					generalGenre: parsedAlbumDetails.generalGenre, // Include generalGenre for songs
+					specificGenres: parsedAlbumDetails.specificGenres, // Include specificGenres for songs
+				});
+
+				await song.save();
+				songIds.push(song._id);
+			}
+
+			// Update album with song IDs
+			album.songs = songIds;
+			await album.save();
+
+			res.status(201).json(album);
+
+		} else {
+			// Single audio file - create a single song
+			if (!imageFile || !singleSongDetails) {
+				return res.status(400).json({ message: "Missing image or song details for single song upload" });
+			}
+
+			const audioUrl = await uploadToCloudinary(audioFiles); // audioFiles is a single file here
+			const imageUrl = await uploadToCloudinary(imageFile);
+
+			const song = new Song({
+				title: singleSongDetails.title,
+				artist: singleSongDetails.artist,
+				audioUrl,
+				imageUrl,
+				duration: 0, // TODO: Get actual duration
+				albumId: null,
+			});
+
+			await song.save();
+
+			res.status(201).json(song);
+		}
+
+	} catch (error) {
+		console.log("Error in handleUpload", error);
+		next(error);
+	}
+};
