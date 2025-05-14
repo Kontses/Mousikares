@@ -3,11 +3,16 @@ import { Album } from "../models/album.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
 // helper function for cloudinary uploads
-const uploadToCloudinary = async (file) => {
+const uploadToCloudinary = async (file, folder, publicId = null, resourceType = "auto") => {
 	try {
-		const result = await cloudinary.uploader.upload(file.tempFilePath, {
-			resource_type: "auto",
-		});
+		const options = {
+			resource_type: resourceType, // Use the resourceType parameter here
+			folder: folder, // Add the folder parameter here
+		};
+		if (publicId) {
+			options.public_id = publicId;
+		}
+		const result = await cloudinary.uploader.upload(file.tempFilePath, options);
 		return result.secure_url;
 	} catch (error) {
 		console.log("Error in uploadToCloudinary", error);
@@ -129,34 +134,80 @@ export const handleUpload = async (req, res, next) => {
 				return res.status(400).json({ message: "Missing image or album details for album upload" });
 			}
 
-			const imageUrl = await uploadToCloudinary(imageFile);
-
 			const parsedAlbumDetails = JSON.parse(albumDetails); // Parse albumDetails JSON
 			const parsedAlbumSongsDetails = JSON.parse(albumSongsDetails); // Parse albumSongsDetails JSON
 			console.log("Parsed albumSongsDetails:", parsedAlbumSongsDetails); // Log parsed albumSongsDetails
 
-			const album = new Album({
+			// Construct the new image public ID with the desired naming convention
+			const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+			const artistName = parsedAlbumDetails.artist;
+			const albumTitle = parsedAlbumDetails.title;
+			const newImagePublicId = `${uploadDate}_${artistName}_${albumTitle}`;
+			const albumFolder = `mousikares/artists/${artistName}/${albumTitle}`;
+
+
+			const imageUrl = await uploadToCloudinary(imageFile, albumFolder, newImagePublicId); // Upload image with the new public ID and folder
+
+			let album;
+			// Check if an album with the same title and artist already exists
+			const existingAlbum = await Album.findOne({
 				title: parsedAlbumDetails.title,
 				artist: parsedAlbumDetails.artist,
-				imageUrl,
-				releaseDate: new Date(parsedAlbumDetails.releaseDate), // Use releaseDate and convert to Date
-				generalGenre: parsedAlbumDetails.generalGenre, // Include generalGenre
-				specificGenres: parsedAlbumDetails.specificGenres, // Include specificGenres
 			});
 
-			await album.save();
+			if (existingAlbum) {
+				console.log(`Existing album found: ${existingAlbum.title} by ${existingAlbum.artist}. Overwriting.`);
+				// If existing album found, update it
+				album = existingAlbum;
+				album.imageUrl = imageUrl;
+				album.releaseDate = new Date(parsedAlbumDetails.releaseDate);
+				album.generalGenre = parsedAlbumDetails.generalGenre;
+				album.specificGenres = parsedAlbumDetails.specificGenres;
+				// Clear existing songs
+				await Song.deleteMany({ albumId: album._id });
+				album.songs = []; // Clear song references in the album
+			} else {
+				console.log(`No existing album found. Creating a new album: ${parsedAlbumDetails.title} by ${parsedAlbumDetails.artist}.`);
+				// If no existing album found, create a new one
+				album = new Album({
+					title: parsedAlbumDetails.title,
+					artist: parsedAlbumDetails.artist,
+					imageUrl,
+					releaseDate: new Date(parsedAlbumDetails.releaseDate),
+					generalGenre: parsedAlbumDetails.generalGenre,
+					specificGenres: parsedAlbumDetails.specificGenres,
+				});
+			}
+
+			await album.save(); // Save the new or updated album
 
 			const songIds = [];
-			for (const [index, audioFile] of audioFiles.entries()) {
-				const audioUrl = await uploadToCloudinary(audioFile);
-				const songDetails = parsedAlbumSongsDetails[index]; // Get details for the specific song from parsed data
-				console.log(`Processing song ${index}:`, songDetails); // Log song details
+			// Iterate through parsedAlbumSongsDetails to maintain order
+			for (const songDetails of parsedAlbumSongsDetails) {
+				// Find the corresponding audio file using the fileName
+				const audioFile = audioFiles.find(file => file.name === songDetails.fileName);
+
+				if (!audioFile) {
+					console.error(`Audio file not found for song: ${songDetails.fileName}`);
+					// Depending on requirements, you might want to return an error or skip this song
+					continue;
+				}
+
+				// Construct the song public ID with the desired naming convention
+				const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+				const artistName = parsedAlbumDetails.artist;
+				const songTitle = songDetails.title;
+				const newSongPublicId = `${uploadDate}_${artistName}_${songTitle}`;
+
+				const audioUrl = await uploadToCloudinary(audioFile, albumFolder, newSongPublicId, "video"); // Upload audio with the album folder, public ID, and resourceType "video"
+				console.log(`Processing song:`, songDetails); // Log song details
 				console.log(`Song title: ${songDetails.title}`); // Log song title
 
+
 				const song = new Song({
-					title: songDetails.title,
-					artist: parsedAlbumDetails.artist, // Assuming album artist for all songs in album
-					audioUrl,
+					title: songDetails.title, // Use the original song title
+					artist: artistName, // Assuming album artist for all songs in album
+					audioUrl, // audioUrl already includes the public ID from uploadToCloudinary
 					imageUrl, // Using album image for songs in album
 					duration: 0, // TODO: Get actual duration
 					albumId: album._id,
@@ -180,12 +231,24 @@ export const handleUpload = async (req, res, next) => {
 				return res.status(400).json({ message: "Missing image or song details for single song upload" });
 			}
 
-			const audioUrl = await uploadToCloudinary(audioFiles); // audioFiles is a single file here
-			const imageUrl = await uploadToCloudinary(imageFile);
+			// Construct the new image public ID with the desired naming convention for single songs
+			const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+			const artistName = singleSongDetails.artist;
+			const songTitle = singleSongDetails.title;
+			const newImagePublicId = `${uploadDate}_${artistName}_${songTitle}`;
+			const artistFolder = `mousikares/artists/${artistName}`;
+
+
+			const imageUrl = await uploadToCloudinary(imageFile, artistFolder, newImagePublicId); // Upload image with the new public ID and folder
+
+			// Construct the new song public ID with the desired naming convention for single songs
+			const newSongPublicId = `${uploadDate}_${artistName}_${songTitle}`;
+
+			const audioUrl = await uploadToCloudinary(audioFiles, artistFolder, newSongPublicId, "video"); // audioFiles is a single file here, upload with artist folder and public ID, and resourceType "video"
 
 			const song = new Song({
-				title: singleSongDetails.title,
-				artist: singleSongDetails.artist,
+				title: singleSongDetails.title, // Use the original song title from singleSongDetails
+				artist: artistName,
 				audioUrl,
 				imageUrl,
 				duration: 0, // TODO: Get actual duration

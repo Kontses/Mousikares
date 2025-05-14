@@ -35,7 +35,7 @@
 
 ```bash
 PORT=5000
-MONGODB_URI=mongodb+srv://libys97:<db_password>@mousikares.aimfgzk.mongodb.net/?retryWrites=true&w=majority&appName=Mousikares
+MONGODB_URI=mongodb+srv://username:<db_password>@mousikares.aimfgzk.mongodb.net/?retryWrites=true&w=majority&appName=Mousikares
 ADMIN_EMAIL=your-email@example.com
 NODE_ENV=development
 

@@ -15,7 +15,7 @@ export interface Album {
 	title: string;
 	artist: string;
 	imageUrl: string;
-	releaseYear: number;
+	releaseDate: string; // Changed from releaseYear to releaseDate
 	songs: Song[];
 }
 
