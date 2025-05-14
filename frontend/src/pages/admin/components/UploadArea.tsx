@@ -6,6 +6,7 @@ import { axiosInstance } from "@/lib/axios"; // Import axiosInstance
 import toast from "react-hot-toast"; // Import toast
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ButtonProps } from "@/components/ui/button"; // Import ButtonProps
+import { useAuth } from "@clerk/clerk-react"; // Import useAuth
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -17,6 +18,7 @@ const UploadArea = () => {
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const { getToken } = useAuth(); // Get getToken from useAuth
 
 
   const [singleSongDetails, setSingleSongDetails] = useState({
@@ -92,6 +94,20 @@ const UploadArea = () => {
        return;
     }
 
+    // Basic validation for song titles
+    if (audioFiles.length === 1) {
+      if (!singleSongDetails.title.trim()) {
+        toast.error("Please enter a title for the song.");
+        return;
+      }
+    } else {
+      const emptyTitleSong = albumSongsDetails.find(song => !song.title.trim());
+      if (emptyTitleSong) {
+        toast.error(`Please enter a title for the song "${emptyTitleSong.fileName}".`);
+        return;
+      }
+    }
+
     setIsLoading(true);
     const formData = new FormData();
 
@@ -114,9 +130,11 @@ const UploadArea = () => {
     }
 
     try {
+      const token = await getToken(); // Get the token
       const response = await axiosInstance.post("/admin/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`, // Add Authorization header
         },
       });
 

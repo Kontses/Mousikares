@@ -132,6 +132,8 @@ export const handleUpload = async (req, res, next) => {
 			const imageUrl = await uploadToCloudinary(imageFile);
 
 			const parsedAlbumDetails = JSON.parse(albumDetails); // Parse albumDetails JSON
+			const parsedAlbumSongsDetails = JSON.parse(albumSongsDetails); // Parse albumSongsDetails JSON
+			console.log("Parsed albumSongsDetails:", parsedAlbumSongsDetails); // Log parsed albumSongsDetails
 
 			const album = new Album({
 				title: parsedAlbumDetails.title,
@@ -147,7 +149,9 @@ export const handleUpload = async (req, res, next) => {
 			const songIds = [];
 			for (const [index, audioFile] of audioFiles.entries()) {
 				const audioUrl = await uploadToCloudinary(audioFile);
-				const songDetails = albumSongsDetails[index]; // Get details for the specific song
+				const songDetails = parsedAlbumSongsDetails[index]; // Get details for the specific song from parsed data
+				console.log(`Processing song ${index}:`, songDetails); // Log song details
+				console.log(`Song title: ${songDetails.title}`); // Log song title
 
 				const song = new Song({
 					title: songDetails.title,
