@@ -143,7 +143,7 @@ export const handleUpload = async (req, res, next) => {
 			const artistName = parsedAlbumDetails.artist;
 			const albumTitle = parsedAlbumDetails.title;
 			const newImagePublicId = `${uploadDate}_${artistName}_${albumTitle}`;
-			const albumFolder = `mousikares/artists/${artistName}/${albumTitle}`;
+			const albumFolder = `laterna/artists/${artistName}/${albumTitle}`;
 
 
 			const imageUrl = await uploadToCloudinary(imageFile, albumFolder, newImagePublicId); // Upload image with the new public ID and folder
@@ -236,7 +236,7 @@ export const handleUpload = async (req, res, next) => {
 			const artistName = singleSongDetails.artist;
 			const songTitle = singleSongDetails.title;
 			const newImagePublicId = `${uploadDate}_${artistName}_${songTitle}`;
-			const artistFolder = `mousikares/artists/${artistName}`;
+			const artistFolder = `laterna/artists/${artistName}`;
 
 
 			const imageUrl = await uploadToCloudinary(imageFile, artistFolder, newImagePublicId); // Upload image with the new public ID and folder

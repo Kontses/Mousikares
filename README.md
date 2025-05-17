@@ -1,16 +1,14 @@
-<h1 align="center">Mousikares ✨</h1>
+<h1 align="center">Laterna ✨</h1>
 
-[Watch Full Tutorial on Youtube](https://youtu.be/4sbklcQ0EXc)
-
-# Ανάλυση Εφαρμογής Mousikares
+# Ανάλυση Εφαρμογής Laterna
 
 ## Γενική Επισκόπηση
 
-Η εφαρμογή Mousikares είναι μια πλατφόρμα streaming μουσικής και κοινωνικής δικτύωσης. Περιλαμβάνει:
+Η εφαρμογή Laterna είναι μια πλατφόρμα streaming μουσικής και κοινωνικής δικτύωσης. Περιλαμβάνει:
 
 -   🎸 Αναπαραγωγή μουσικής (επόμενο/προηγούμενο τραγούδι, έλεγχος έντασης)
 -   🔈 Πίνακα διαχείρισης για admins (δημιουργία άλμπουμ και τραγουδιών)
--   🎧 Real-time chat ενσωματωμένο στο Mousikares
+-   🎧 Real-time chat ενσωματωμένο στο Laterna
 -   💬 Ένδειξη online/offline χρηστών
 -   👨🏼‍💼 Προβολή του τι ακούνε άλλοι χρήστες σε πραγματικό χρόνο
 -   👀 Σελίδα αναλυτικών στατιστικών
@@ -35,7 +33,7 @@
 
 ```bash
 PORT=5000
-MONGODB_URI=mongodb+srv://username:<db_password>@mousikares.aimfgzk.mongodb.net/?retryWrites=true&w=majority&appName=Mousikares
+MONGODB_URI=mongodb+srv://username:<db_password>@laterna.aimfgzk.mongodb.net/?retryWrites=true&w=majority&appName=Laterna
 ADMIN_EMAIL=your-email@example.com
 NODE_ENV=development
 
