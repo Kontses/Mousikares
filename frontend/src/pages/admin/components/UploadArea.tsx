@@ -11,6 +11,23 @@ import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, u
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'; // Import restrictToVerticalAxis
+import CryptoJS from 'crypto-js'; // Import crypto-js
+
+// Function to calculate MD5 hash of a file using crypto-js
+const calculateMD5 = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const binaryString = event.target?.result as string;
+      const md5Hash = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString();
+      resolve(md5Hash);
+    };
+    reader.onerror = (event) => {
+      reject(event.target?.error);
+    };
+    reader.readAsBinaryString(file);
+  });
+};
 
 const UploadArea = () => {
   const [audioFiles, setAudioFiles] = useState<File[]>([]);
@@ -62,20 +79,28 @@ const UploadArea = () => {
     setIsDragging(false);
   };
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
     const files = Array.from(event.dataTransfer.files).filter(file => file.type.startsWith('audio/'));
     setAudioFiles(files);
-    // Initialize albumSongsDetails based on dropped files, including fileName
-    setAlbumSongsDetails(files.map(file => ({ title: file.name.replace(/\.[^/.]+$/, ""), fileName: file.name })));
+    // Initialize albumSongsDetails based on dropped files, including fileName and md5 hash
+    const songsDetails = await Promise.all(files.map(async file => {
+      const md5 = await calculateMD5(file);
+      return { title: file.name.replace(/\.[^/.]+$/, ""), fileName: file.name, md5: md5 };
+    }));
+    setAlbumSongsDetails(songsDetails);
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []).filter(file => file.type.startsWith('audio/'));
     setAudioFiles(files);
-     // Initialize albumSongsDetails based on selected files, including fileName
-    setAlbumSongsDetails(files.map(file => ({ title: file.name.replace(/\.[^/.]+$/, ""), fileName: file.name })));
+     // Initialize albumSongsDetails based on selected files, including fileName and md5 hash
+    const songsDetails = await Promise.all(files.map(async file => {
+      const md5 = await calculateMD5(file);
+      return { title: file.name.replace(/\.[^/.]+$/, ""), fileName: file.name, md5: md5 };
+    }));
+    setAlbumSongsDetails(songsDetails);
   };
 
    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,9 +138,9 @@ const UploadArea = () => {
     setIsLoading(true);
     const formData = new FormData();
 
-    // Append audio files
-    audioFiles.forEach((file, index) => {
-      formData.append(`audioFiles`, file); // Use the same key 'audioFiles' as expected in backend
+    // Append audio files under the key 'audioFiles'
+    audioFiles.forEach((file) => {
+      formData.append('audioFiles', file); // Use 'audioFiles' as the key
     });
 
     // Append image file

@@ -91,14 +91,14 @@ const AlbumPage = () => {
 							<div className='px-6 py-4 text-sm text-zinc-400'>
 								{currentAlbum.description.length > 200 && !isDescriptionExpanded ? (
 									<>
-										{currentAlbum.description.substring(0, 200)}...
+										<span dangerouslySetInnerHTML={{ __html: currentAlbum.description.substring(0, 200).replace(/\n/g, '<br>') + '...' }} />
 										<Button variant="link" size="sm" onClick={() => setIsDescriptionExpanded(true)} className="text-zinc-100 p-0 h-auto">
 											Expand
 										</Button>
 									</>
 								) : (
 									<>
-										{currentAlbum.description}
+										<span dangerouslySetInnerHTML={{ __html: currentAlbum.description.replace(/\n/g, '<br>') }} />
 										{currentAlbum.description.length > 200 && isDescriptionExpanded && (
 											<Button variant="link" size="sm" onClick={() => setIsDescriptionExpanded(false)} className="text-zinc-100 p-0 h-auto">
 												Collapse
