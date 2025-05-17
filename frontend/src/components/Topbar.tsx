@@ -16,10 +16,10 @@ const Topbar = () => {
       backdrop-blur-md z-10
     '
 		>
-			<div className='flex gap-2 items-center'>
+			<Link to='/about' className='flex gap-2 items-center'>
 				<img src='/laternalogo.png' className='size-8' alt='Laterna logo' />
 				Laterna
-			</div>
+			</Link>
 			<div className='flex items-center gap-4'>
 				{isAdmin && (
 					<Link to={"/admin"} className={cn(buttonVariants({ variant: "outline" }))}>
