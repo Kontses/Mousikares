@@ -10,6 +10,7 @@ import { useAuth } from "@clerk/clerk-react"; // Import useAuth
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'; // Import restrictToVerticalAxis
 
 const UploadArea = () => {
   const [audioFiles, setAudioFiles] = useState<File[]>([]);
@@ -33,7 +34,7 @@ const UploadArea = () => {
     releaseDate: "", // Change to releaseDate string
     generalGenre: "", // Add generalGenre
     specificGenres: "", // Store as raw string for input
-    // Add other album fields as needed (e.g., description)
+    description: "", // Added description field
   });
 
   const [albumSongsDetails, setAlbumSongsDetails] = useState<{ title: string, fileName: string }[]>([]); // Include fileName
@@ -43,6 +44,7 @@ const UploadArea = () => {
       activationConstraint: {
         distance: 8, // 8px of motion before activating
       },
+      axis: 'y', // Limit movement to the vertical axis
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -145,7 +147,7 @@ const UploadArea = () => {
       setAudioFiles([]);
       setImageFile(null);
       setSingleSongDetails({ title: "", artist: "" });
-      setAlbumDetails({ title: "", artist: "", releaseDate: "", generalGenre: "", specificGenres: "" as string }); // Clear specificGenres as raw string
+      setAlbumDetails({ title: "", artist: "", releaseDate: "", generalGenre: "", specificGenres: "" as string, description: "" }); // Clear specificGenres as raw string and add description
       setAlbumSongsDetails([]);
        if (fileInputRef.current) fileInputRef.current.value = "";
        if (imageInputRef.current) imageInputRef.current.value = "";
@@ -331,6 +333,18 @@ const UploadArea = () => {
                   />
                 </div>
 
+                {/* Description */}
+                <div className='space-y-2'>
+                  <label htmlFor="description" className='text-sm font-medium'>Album Description</label>
+                  <textarea
+                    id="description"
+                    value={albumDetails.description}
+                    onChange={(e) => setAlbumDetails({ ...albumDetails, description: e.target.value })}
+                    className='flex h-20 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm ring-offset-zinc-950 placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]'
+                    placeholder='Enter album description'
+                  />
+                </div>
+
                 {/* Genre Section */}
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold mt-6">Genre</h4>
@@ -384,6 +398,7 @@ const UploadArea = () => {
                   sensors={sensors}
                   collisionDetection={closestCorners}
                   onDragEnd={handleDragEnd}
+                  modifiers={[restrictToVerticalAxis]} // Add the modifier here
                 >
                   <SortableContext
                     items={albumSongsDetails.map(song => song.title)} // Use song titles as unique IDs

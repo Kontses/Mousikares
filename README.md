@@ -1,4 +1,4 @@
-<h1 align="center">Laterna ✨</h1>
+<h1 align="center">✨ Laterna ✨</h1>
 
 # Ανάλυση Εφαρμογής Laterna
 

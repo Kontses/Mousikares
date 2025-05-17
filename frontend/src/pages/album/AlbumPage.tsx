@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Clock, Pause, Play, Download } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export const formatDuration = (seconds: number) => {
@@ -16,6 +16,7 @@ const AlbumPage = () => {
 	const { albumId } = useParams();
 	const { fetchAlbumById, currentAlbum, isLoading } = useMusicStore();
 	const { currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State for description expansion
 
 	useEffect(() => {
 		if (albumId) fetchAlbumById(albumId);
@@ -84,6 +85,29 @@ const AlbumPage = () => {
 								</div>
 							</div>
 						</div>
+
+						{/* Album Description */}
+						{currentAlbum?.description && (
+							<div className='px-6 py-4 text-sm text-zinc-400'>
+								{currentAlbum.description.length > 200 && !isDescriptionExpanded ? (
+									<>
+										{currentAlbum.description.substring(0, 200)}...
+										<Button variant="link" size="sm" onClick={() => setIsDescriptionExpanded(true)} className="text-zinc-100 p-0 h-auto">
+											Expand
+										</Button>
+									</>
+								) : (
+									<>
+										{currentAlbum.description}
+										{currentAlbum.description.length > 200 && isDescriptionExpanded && (
+											<Button variant="link" size="sm" onClick={() => setIsDescriptionExpanded(false)} className="text-zinc-100 p-0 h-auto">
+												Collapse
+											</Button>
+										)}
+									</>
+								)}
+							</div>
+						)}
 
 						{/* play button */}
 						<div className='px-6 pb-4 flex items-center gap-6'>

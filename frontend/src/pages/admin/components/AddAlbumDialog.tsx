@@ -5,6 +5,9 @@ import {
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
@@ -23,6 +26,7 @@ const AddAlbumDialog = () => {
 		title: "",
 		artist: "",
 		releaseYear: new Date().getFullYear(),
+		description: "", // Added description state
 	});
 
 	const [imageFile, setImageFile] = useState<File | null>(null);
@@ -46,6 +50,7 @@ const AddAlbumDialog = () => {
 			formData.append("title", newAlbum.title);
 			formData.append("artist", newAlbum.artist);
 			formData.append("releaseYear", newAlbum.releaseYear.toString());
+			formData.append("description", newAlbum.description); // Append description
 			formData.append("imageFile", imageFile);
 
 			await axiosInstance.post("/admin/albums", formData, {
@@ -58,6 +63,7 @@ const AddAlbumDialog = () => {
 				title: "",
 				artist: "",
 				releaseYear: new Date().getFullYear(),
+				description: "", // Reset description state
 			});
 			setImageFile(null);
 			setAlbumDialogOpen(false);
@@ -82,8 +88,9 @@ const AddAlbumDialog = () => {
 					<DialogTitle>Add New Album</DialogTitle>
 					<DialogDescription>Add a new album to your collection</DialogDescription>
 				</DialogHeader>
-				<div className='space-y-4 py-4'>
-					<input
+				<ScrollArea className="h-[400px] px-4"> {/* Added ScrollArea */}
+					<div className='space-y-4 py-4'>
+						<input
 						type='file'
 						ref={fileInputRef}
 						onChange={handleImageSelect}
@@ -136,7 +143,19 @@ const AddAlbumDialog = () => {
 							max={new Date().getFullYear()}
 						/>
 					</div>
+					{/* Description */}
+					<div className='space-y-2'>
+						<label htmlFor="description" className='text-sm font-medium'>Album Description</label>
+						<textarea
+							id="description"
+							value={newAlbum.description}
+							onChange={(e) => setNewAlbum({ ...newAlbum, description: e.target.value })}
+							className='flex h-20 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm ring-offset-zinc-950 placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]'
+							placeholder='Enter album description'
+						/>
+					</div>
 				</div>
+				</ScrollArea> {/* Closing ScrollArea tag */}
 				<DialogFooter>
 					<Button variant='outline' onClick={() => setAlbumDialogOpen(false)} disabled={isLoading}>
 						Cancel

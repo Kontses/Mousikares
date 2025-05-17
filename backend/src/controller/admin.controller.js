@@ -81,7 +81,7 @@ export const deleteSong = async (req, res, next) => {
 
 export const createAlbum = async (req, res, next) => {
 	try {
-		const { title, artist, releaseYear } = req.body;
+		const { title, artist, releaseYear, description } = req.body;
 		const { imageFile } = req.files;
 
 		const imageUrl = await uploadToCloudinary(imageFile);
@@ -91,6 +91,7 @@ export const createAlbum = async (req, res, next) => {
 			artist,
 			imageUrl,
 			releaseYear,
+			description,
 		});
 
 		await album.save();
@@ -163,6 +164,7 @@ export const handleUpload = async (req, res, next) => {
 				album.releaseDate = new Date(parsedAlbumDetails.releaseDate);
 				album.generalGenre = parsedAlbumDetails.generalGenre;
 				album.specificGenres = parsedAlbumDetails.specificGenres;
+				album.description = parsedAlbumDetails.description; // Update description
 				// Clear existing songs
 				await Song.deleteMany({ albumId: album._id });
 				album.songs = []; // Clear song references in the album

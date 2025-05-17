@@ -16,6 +16,7 @@ export interface Album {
 	artist: string;
 	imageUrl: string;
 	releaseYear: number;
+	description?: string; // Added optional description field
 	songs: Song[];
 }
 
