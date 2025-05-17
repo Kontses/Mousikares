@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Clock, Pause, Play } from "lucide-react";
+import { Clock, Pause, Play, Download } from "lucide-react";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -67,6 +67,20 @@ const AlbumPage = () => {
 									<span className='font-medium text-white'>{currentAlbum?.artist}</span>
 									<span>• {currentAlbum?.songs.length} songs</span>
 									<span>• {currentAlbum?.releaseYear}</span>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => {
+											if (currentAlbum) {
+												const cloudName = 'YOUR_CLOUD_NAME'; // Replace with your Cloudinary cloud name
+												const folderPath = `laterna/artists/${currentAlbum.artist}/${currentAlbum.title}`;
+												const zipUrl = `https://res.cloudinary.com/${cloudName}/image/list/${folderPath}/archive.zip`;
+												window.open(zipUrl, '_blank');
+											}
+										}}
+									>
+										Download Album
+									</Button>
 								</div>
 							</div>
 						</div>
@@ -91,15 +105,15 @@ const AlbumPage = () => {
 						<div className='bg-black/20 backdrop-blur-sm'>
 							{/* table header */}
 							<div
-								className='grid grid-cols-[16px_4fr_2fr_1fr] gap-4 px-10 py-2 text-sm 
+								className='grid grid-cols-[16px_5fr_60px_auto] gap-4 px-10 py-2 text-sm 
             text-zinc-400 border-b border-white/5'
 							>
 								<div>#</div>
 								<div>Title</div>
-								<div>Released Date</div>
 								<div>
 									<Clock className='h-4 w-4' />
 								</div>
+								<div><Download className='h-4 w-4' /></div>
 							</div>
 
 							{/* songs list */}
@@ -112,7 +126,7 @@ const AlbumPage = () => {
 											<div
 												key={song._id}
 												onClick={() => handlePlaySong(index)}
-												className={`grid grid-cols-[16px_4fr_2fr_1fr] gap-4 px-4 py-2 text-sm 
+												className={`grid grid-cols-[16px_5fr_60px_auto] gap-4 px-4 py-2 text-sm 
                       text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer
                       `}
 											>
@@ -135,8 +149,24 @@ const AlbumPage = () => {
 														<div>{song.artist}</div>
 													</div>
 												</div>
-												<div className='flex items-center'>{song.createdAt.split("T")[0]}</div>
 												<div className='flex items-center'>{formatDuration(song.duration)}</div>
+												<div className='flex items-center'>
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={(e) => {
+															e.stopPropagation(); // Prevent triggering the song play
+															const link = document.createElement('a');
+															link.href = song.audioUrl;
+															link.setAttribute('download', `${song.title}.mp3`); // Set the download attribute with filename
+															document.body.appendChild(link);
+															link.click();
+															document.body.removeChild(link);
+														}}
+													>
+														<Download className='h-4 w-4' />
+													</Button>
+												</div>
 											</div>
 										);
 									})}

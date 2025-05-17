@@ -142,7 +142,7 @@ export const handleUpload = async (req, res, next) => {
 			const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 			const artistName = parsedAlbumDetails.artist;
 			const albumTitle = parsedAlbumDetails.title;
-			const newImagePublicId = `${uploadDate}_${artistName}_${albumTitle}`;
+			const newImagePublicId = `${artistName} - ${albumTitle}`;
 			const albumFolder = `laterna/artists/${artistName}/${albumTitle}`;
 
 
@@ -194,10 +194,9 @@ export const handleUpload = async (req, res, next) => {
 				}
 
 				// Construct the song public ID with the desired naming convention
-				const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 				const artistName = parsedAlbumDetails.artist;
 				const songTitle = songDetails.title;
-				const newSongPublicId = `${uploadDate}_${artistName}_${songTitle}`;
+				const newSongPublicId = `${songDetails.trackNumber}) ${songTitle}`;
 
 				const audioUrl = await uploadToCloudinary(audioFile, albumFolder, newSongPublicId, "video"); // Upload audio with the album folder, public ID, and resourceType "video"
 				console.log(`Processing song:`, songDetails); // Log song details
@@ -232,17 +231,16 @@ export const handleUpload = async (req, res, next) => {
 			}
 
 			// Construct the new image public ID with the desired naming convention for single songs
-			const uploadDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 			const artistName = singleSongDetails.artist;
 			const songTitle = singleSongDetails.title;
-			const newImagePublicId = `${uploadDate}_${artistName}_${songTitle}`;
+			const newImagePublicId = `${artistName} - ${songTitle}`;
 			const artistFolder = `laterna/artists/${artistName}`;
 
 
 			const imageUrl = await uploadToCloudinary(imageFile, artistFolder, newImagePublicId); // Upload image with the new public ID and folder
 
 			// Construct the new song public ID with the desired naming convention for single songs
-			const newSongPublicId = `${uploadDate}_${artistName}_${songTitle}`;
+			const newSongPublicId = `${songTitle}`; // Assuming no track number for single songs
 
 			const audioUrl = await uploadToCloudinary(audioFiles, artistFolder, newSongPublicId, "video"); // audioFiles is a single file here, upload with artist folder and public ID, and resourceType "video"
 
